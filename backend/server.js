@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 import User from "./models/user.model.js";
-import Travel from "./models/travel.model.js";
+import TravelStory from "./models/travelStory.model.js";
 import { authenticateToken } from "./utilities.js";
 
 dotenv.config();
@@ -111,9 +111,35 @@ app.get("/get-user", authenticateToken, async (req, res) => {
 	});
 });
 
-app.get("/add-travel-story", authenticateToken, async (req, res) => {
+app.post("/add-travel-story", authenticateToken, async (req, res) => {
+	const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
+	const { userId } = req.user;
 
-})
+	if (!title || !story || !visitedLocation || !imageUrl || !visitedDate) {
+		return res.status(400).json({ error: true, message: "All fields are required." });
+	}
+
+	const parsedVisitedDate = new Date(parseInt(visitedDate));
+
+	try {
+		const travelStory = new TravelStory({
+			title,
+			story,
+			visitedLocation,
+			userId,
+			imageUrl,
+			visitedDate: parsedVisitedDate,
+		});
+
+		await travelStory.save();
+		res.status(201).json({
+			story: travelStory,
+			message: "Travel added successfully.",
+		});
+	} catch (error) {
+		res.status(400).json({ error: true, message: error.message });
+	}
+});
 
 app.listen(PORT, async () => {
 	console.log(`Server is running on  http://localhost:${PORT}`);

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-const travelSchema = new Schema({
+const travelStorySchema = new Schema({
 	title: {
 		type: String,
 		required: true,
@@ -34,6 +34,6 @@ const travelSchema = new Schema({
 	},
 });
 
-const Travel = mongoose.model("Travel", travelSchema);
+const TravelStory = mongoose.model("TravelStory", travelStorySchema);
 
-export default Travel;
+export default TravelStory;
