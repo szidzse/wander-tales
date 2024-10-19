@@ -54,14 +54,44 @@ app.post("/signup", async (req, res) => {
 		expiresIn: "72h",
 	});
 
-	return res
-		.status(201)
-		.json({
-			error: false,
-			user: { fullName: user.fullName, email: user.email },
-			accessToken,
-			message: "Registration successful.",
-		});
+	return res.status(201).json({
+		error: false,
+		user: { fullName: user.fullName, email: user.email },
+		accessToken,
+		message: "Registration successful.",
+	});
+});
+
+app.post("/login", async (req, res) => {
+	const { email, password } = req.body;
+
+	if (!email || !password) {
+		return res.status(400).json({ message: "Email and password are required." });
+	}
+
+	const user = await User.findOne({ email });
+	if (!user) {
+		return res.status(400).json({ message: "User not found." });
+	}
+
+	const isPasswordValid = await bcrypt.compare(password, user.password);
+	if (!isPasswordValid) {
+		return res.status(400).json({ message: "Invalid credentials." });
+	}
+
+	const accessToken = jwt.sign({ userId: user._id }, process.env.ACCESS_TOKEN_SECRET, {
+		expiresIn: "72h",
+	});
+
+	return res.json({
+		error: false,
+		message: "Login successful.",
+		user: {
+			fullName: user.fullName,
+			email: user.email,
+		},
+		accessToken,
+	});
 });
 
 app.listen(PORT, async () => {
