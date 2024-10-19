@@ -141,6 +141,17 @@ app.post("/add-travel-story", authenticateToken, async (req, res) => {
 	}
 });
 
+app.get("/get-all-travel-stories", authenticateToken, async (req, res) => {
+	const { userId } = req.user;
+
+	try {
+		const travelStories = await TravelStory.find({ userId: userId }).sort({ isFavorite: -1 });
+		res.status(200).json({ stories: travelStories });
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
+
 app.listen(PORT, async () => {
 	console.log(`Server is running on  http://localhost:${PORT}`);
 });
