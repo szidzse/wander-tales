@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 import User from "./models/user.model.js";
+import { authenticateToken } from "./utilities.js";
 
 dotenv.config();
 
@@ -91,6 +92,21 @@ app.post("/login", async (req, res) => {
 			email: user.email,
 		},
 		accessToken,
+	});
+});
+
+app.get("/get-user", authenticateToken, async (req, res) => {
+	const { userId } = req.user;
+
+	const isUser = await User.findOne({ _id: userId });
+
+	if (!isUser) {
+		return res.sendStatus(401);
+	}
+
+	return res.json({
+		user: isUser,
+		message: "",
 	});
 });
 
