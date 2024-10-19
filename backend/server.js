@@ -28,6 +28,9 @@ const connectDB = async () => {
 };
 connectDB();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const PORT = 8000;
 const app = express();
 
@@ -116,6 +119,47 @@ app.get("/get-user", authenticateToken, async (req, res) => {
 	});
 });
 
+app.post("/upload-image", upload.single("image"), async (req, res) => {
+	try {
+		if (!req.file) {
+			return res
+				.status(400)
+				.json({ error: true, message: "No image provided. Please upload an image file." });
+		}
+
+		const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+
+		res.status(201).json({ imageUrl });
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
+
+app.delete("/delete-image", async (req, res) => {
+	const { imageUrl } = req.query;
+
+	if (!imageUrl) {
+		return res.status(400).json({ error: true, message: "An 'imageUrl' parameter is required." });
+	}
+
+	try {
+		const filename = path.basename(imageUrl);
+
+		const filePath = path.join(__dirname, "uploads", filename);
+
+		if (fs.existsSync(filePath)) {
+			fs.unlinkSync(filePath);
+			res.status(200).json({ message: "Image deleted successfully." });
+		} else {
+			res.status(200).json({ error: true, message: "Image not found." });
+		}
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.post("/add-travel-story", authenticateToken, async (req, res) => {
 	const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
 	const { userId } = req.user;
@@ -157,48 +201,38 @@ app.get("/get-all-travel-stories", authenticateToken, async (req, res) => {
 	}
 });
 
-app.post("/upload-image", upload.single("image"), async (req, res) => {
+app.put("/edit-travel-story/:id", authenticateToken, async (req, res) => {
+	const { id } = req.params;
+	const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
+	const { userId } = req.user;
+
+	if (!title || !story || !visitedLocation || !imageUrl || !visitedDate) {
+		return res.status(400).json({ error: true, message: "All fields are required." });
+	}
+
+	const parsedVisitedDate = new Date(parseInt(visitedDate));
+
 	try {
-		if (!req.file) {
-			return res
-				.status(400)
-				.json({ error: true, message: "No image provided. Please upload an image file." });
+		const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
+
+		if (!travelStory) {
+			return res.status(404).json({ error: true, message: "Travel story not found." });
 		}
 
-		const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+		const placeholderImageUrl = `http://localhost:8000/assets/placeholder.png`;
 
-		res.status(201).json({ imageUrl });
+		travelStory.title = title;
+		travelStory.story = story;
+		travelStory.visitedLocation = visitedLocation;
+		travelStory.imageUrl = imageUrl || placeholderImageUrl;
+		travelStory.visitedDate = parsedVisitedDate;
+
+		await travelStory.save();
+		res.status(200).json({ story: travelStory, message: "Travel updated successfully." });
 	} catch (error) {
 		res.status(500).json({ error: true, message: error.message });
 	}
 });
-
-app.delete("/delete-image", async (req, res) => {
-	const { imageUrl } = req.query;
-
-	if (!imageUrl) {
-		return res.status(400).json({ error: true, message: "An 'imageUrl' parameter is required." });
-	}
-
-	try {
-		const filename = path.basename(imageUrl);
-
-		const filePath = path.join(__dirname, "uploads", filename);
-
-		if (fs.existsSync(filePath)) {
-			fs.unlinkSync(filePath);
-			res.status(200).json({ message: "Image deleted successfully." });
-		} else {
-			res.status(200).json({ error: true, message: "Image not found." });
-		}
-	} catch (error) {
-		res.status(500).json({ error: true, message: error.message });
-	}
-});
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.listen(PORT, async () => {
 	console.log(`Server is running on  http://localhost:${PORT}`);
