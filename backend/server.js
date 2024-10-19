@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 import User from "./models/user.model.js";
+import Travel from "./models/travel.model.js";
 import { authenticateToken } from "./utilities.js";
 
 dotenv.config();
@@ -109,6 +110,10 @@ app.get("/get-user", authenticateToken, async (req, res) => {
 		message: "",
 	});
 });
+
+app.get("/add-travel-story", authenticateToken, async (req, res) => {
+
+})
 
 app.listen(PORT, async () => {
 	console.log(`Server is running on  http://localhost:${PORT}`);
