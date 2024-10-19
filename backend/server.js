@@ -144,14 +144,13 @@ app.delete("/delete-image", async (req, res) => {
 
 	try {
 		const filename = path.basename(imageUrl);
-
 		const filePath = path.join(__dirname, "uploads", filename);
 
 		if (fs.existsSync(filePath)) {
 			fs.unlinkSync(filePath);
 			res.status(200).json({ message: "Image deleted successfully." });
 		} else {
-			res.status(200).json({ error: true, message: "Image not found." });
+			res.status(404).json({ error: true, message: "Image not found." });
 		}
 	} catch (error) {
 		res.status(500).json({ error: true, message: error.message });
@@ -229,6 +228,36 @@ app.put("/edit-travel-story/:id", authenticateToken, async (req, res) => {
 
 		await travelStory.save();
 		res.status(200).json({ story: travelStory, message: "Travel updated successfully." });
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
+
+app.delete("/delete-travel-story/:id", authenticateToken, async (req, res) => {
+	const { id } = req.params;
+	const { userId } = req.user;
+
+	try {
+		const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
+
+		if (!travelStory) {
+			return res.status(404).json({ error: true, message: "Travel story not found." });
+		}
+
+		await travelStory.deleteOne({ _id: id, userId: userId });
+
+		const imageUrl = travelStory.imageUrl;
+		const filename = path.basename(imageUrl);
+
+		const filePath = path.join(__dirname, "uploads", filename);
+
+		fs.unlink(filePath, (err) => {
+			if (err) {
+				console.error("Failed to delete image file: ", err);
+			}
+		});
+
+		res.status(200).json({ message: "Travel story deleted successfully." });
 	} catch (error) {
 		res.status(500).json({ error: true, message: error.message });
 	}
