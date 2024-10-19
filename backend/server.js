@@ -5,10 +5,15 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import upload from "./multer.js";
+import fs from "fs";
+import path from "path";
+
+import { authenticateToken } from "./utilities.js";
 
 import User from "./models/user.model.js";
 import TravelStory from "./models/travelStory.model.js";
-import { authenticateToken } from "./utilities.js";
+import { error } from "console";
 
 dotenv.config();
 
@@ -147,6 +152,22 @@ app.get("/get-all-travel-stories", authenticateToken, async (req, res) => {
 	try {
 		const travelStories = await TravelStory.find({ userId: userId }).sort({ isFavorite: -1 });
 		res.status(200).json({ stories: travelStories });
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
+
+app.post("/image-upload", upload.single("image"), async (req, res) => {
+	try {
+		if (!req.file) {
+			return res
+				.status(400)
+				.json({ error: true, message: "No image provided. Please upload an image file." });
+		}
+
+		const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+
+		res.status(201).json({ imageUrl });
 	} catch (error) {
 		res.status(500).json({ error: true, message: error.message });
 	}
