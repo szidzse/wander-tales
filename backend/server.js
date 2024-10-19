@@ -14,6 +14,7 @@ import { authenticateToken } from "./utilities.js";
 
 import User from "./models/user.model.js";
 import TravelStory from "./models/travelStory.model.js";
+import { error } from "console";
 
 dotenv.config();
 
@@ -258,6 +259,28 @@ app.delete("/delete-travel-story/:id", authenticateToken, async (req, res) => {
 		});
 
 		res.status(200).json({ message: "Travel story deleted successfully." });
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
+
+app.put("/update-is-favorite/:id", authenticateToken, async (req, res) => {
+	const { id } = req.params;
+	const { isFavorite } = req.body;
+	const { userId } = req.user;
+
+	try {
+		const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
+
+		if (!travelStory) {
+			return res.status(404).json({ error: true, message: "Travel story not found." });
+		}
+
+		travelStory.isFavorite = isFavorite;
+
+		await travelStory.save();
+
+		res.status(200).json({ story: travelStory, message: "Update successful." });
 	} catch (error) {
 		res.status(500).json({ error: true, message: error.message });
 	}
