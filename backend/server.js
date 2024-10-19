@@ -8,12 +8,12 @@ import bcrypt from "bcrypt";
 import upload from "./multer.js";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import { authenticateToken } from "./utilities.js";
 
 import User from "./models/user.model.js";
 import TravelStory from "./models/travelStory.model.js";
-import { error } from "console";
 
 dotenv.config();
 
@@ -157,7 +157,7 @@ app.get("/get-all-travel-stories", authenticateToken, async (req, res) => {
 	}
 });
 
-app.post("/image-upload", upload.single("image"), async (req, res) => {
+app.post("/upload-image", upload.single("image"), async (req, res) => {
 	try {
 		if (!req.file) {
 			return res
@@ -172,6 +172,33 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
 		res.status(500).json({ error: true, message: error.message });
 	}
 });
+
+app.delete("/delete-image", async (req, res) => {
+	const { imageUrl } = req.query;
+
+	if (!imageUrl) {
+		return res.status(400).json({ error: true, message: "An 'imageUrl' parameter is required." });
+	}
+
+	try {
+		const filename = path.basename(imageUrl);
+
+		const filePath = path.join(__dirname, "uploads", filename);
+
+		if (fs.existsSync(filePath)) {
+			fs.unlinkSync(filePath);
+			res.status(200).json({ message: "Image deleted successfully." });
+		} else {
+			res.status(200).json({ error: true, message: "Image not found." });
+		}
+	} catch (error) {
+		res.status(500).json({ error: true, message: error.message });
+	}
+});
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.listen(PORT, async () => {
 	console.log(`Server is running on  http://localhost:${PORT}`);
