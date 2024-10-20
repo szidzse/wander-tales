@@ -9,6 +9,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddEditTravelStory from "./AddEditTravelStory";
 import ViewTravelStory from "./ViewTravelStory";
+import EmptyCard from "../../components/Cards/EmptyCard";
+import EmptyImg from "../../assets/images/placeholder.svg";
 
 const Home = () => {
 	const navigate = useNavigate();
@@ -129,7 +131,10 @@ const Home = () => {
 								})}
 							</div>
 						) : (
-							<>Empty Card Here</>
+							<EmptyCard
+								imgSrc={EmptyImg}
+								message={`Start creating your first Travel Story! Click the 'Add' button to jot down your thoughts, ideas, and memories.`}
+							/>
 						)}
 						<div className="w-[320px]"></div>
 					</div>
