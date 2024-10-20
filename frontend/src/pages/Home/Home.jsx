@@ -3,6 +3,8 @@ import Navbar from "../../components/Navbar";
 import TravelStoryCard from "../../components/Cards/TravelStoryCard";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Home = () => {
 	const [userInfo, setUserInfo] = useState({});
@@ -48,6 +50,7 @@ const Home = () => {
 			});
 
 			if (response.data && response.data.story) {
+				toast.success("Story updated successfully.");
 				getAllTravelStories();
 			}
 		} catch (error) {
@@ -95,6 +98,8 @@ const Home = () => {
 					</div>
 				</div>
 			</div>
+
+			<ToastContainer />
 		</>
 	);
 };
