@@ -8,8 +8,10 @@ import Modal from "react-modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddEditTravelStory from "./AddEditTravelStory";
+import ViewTravelStory from "./ViewTravelStory";
 
 const Home = () => {
+	const navigate = useNavigate();
 	const [userInfo, setUserInfo] = useState({});
 	const [allStories, setAllStories] = useState([]);
 	const [openAddEditModal, setOpenAddEditModal] = useState({
@@ -18,7 +20,10 @@ const Home = () => {
 		data: null,
 	});
 
-	const navigate = useNavigate();
+	const [openViewModal, setOpenViewModal] = useState({
+		isShown: false,
+		data: null,
+	});
 
 	const getAllTravelStories = async () => {
 		try {
@@ -45,9 +50,17 @@ const Home = () => {
 		}
 	};
 
-	const handleEdit = (data) => {};
+	const handleEdit = (data) => {
+		setOpenAddEditModal({
+			isShown: true,
+			type: "edit",
+			data: data,
+		});
+	};
 
-	const handleViewStory = (data) => {};
+	const handleViewStory = (data) => {
+		setOpenViewModal({ isShown: true, data });
+	};
 
 	const updateIsFavorite = async (storyData) => {
 		const storyId = storyData._id;
@@ -125,7 +138,32 @@ const Home = () => {
 					onClose={() => {
 						setOpenAddEditModal({ isShown: false, type: "add", data: null });
 					}}
-          getAllTravelStories={getAllTravelStories}
+					getAllTravelStories={getAllTravelStories}
+				/>
+			</Modal>
+
+			<Modal
+				isOpen={openViewModal.isShown}
+				onRequestClose={() => {}}
+				style={{
+					overlay: {
+						backgroundColor: "rgba(0, 0, 0, 0.2)",
+						zIndex: 999,
+					},
+				}}
+				appElement={document.getElementById("root")}
+				className="model-box"
+			>
+				<ViewTravelStory
+					storyInfo={openViewModal.data || null}
+					onClose={() => {
+						setOpenViewModal((prevState) => ({ ...prevState, isShown: false }));
+					}}
+					onEditClick={() => {
+						setOpenViewModal((prevState) => ({ ...prevState, isShown: false }));
+						handleEdit(openViewModal.data || null);
+					}}
+					onDeleteClick={() => {}}
 				/>
 			</Modal>
 
