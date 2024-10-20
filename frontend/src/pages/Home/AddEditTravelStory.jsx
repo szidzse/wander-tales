@@ -38,10 +38,54 @@ const AddEditTravelStory = ({ storyInfo, type, onClose, getAllTravelStories }) =
 				getAllTravelStories();
 				onClose();
 			}
-		} catch (error) {}
+		} catch (error) {
+			if (error.response && error.response.data && error.response.data.message) {
+				setError(error.response.data.message);
+			} else {
+				setError("An unexpected error occurred. Please try again.");
+			}
+		}
 	};
 
-	const updateTravelStory = async () => {};
+	const updateTravelStory = async () => {
+		const storyId = storyInfo._id;
+
+		try {
+			let imageUrl = "";
+
+			let postData = {
+				title,
+				story,
+				imageUrl: storyInfo.imageUrl || "",
+				visitedLocation,
+				visitedDate: visitedDate ? moment(visitedDate).valueOf() : moment().valueOf(),
+			};
+
+			if (typeof storyImg === "object") {
+				const imgUploadRes = await uploadImage(storyImg);
+				imageUrl = imgUploadRes.imageUrl || "";
+
+				postData = {
+					...postData,
+					imageUrl: imageUrl,
+				};
+			}
+
+			const response = await axiosInstance.put(`/edit-travel-story/${storyId}`, postData);
+
+			if (response.data && response.data.story) {
+				toast.success("Story updated successfully.");
+				getAllTravelStories();
+				onClose();
+			}
+		} catch (error) {
+			if (error.response && error.response.data && error.response.data.message) {
+				setError(error.response.data.message);
+			} else {
+				setError("An unexpected error occurred. Please try again.");
+			}
+		}
+	};
 
 	const handleAddOrUpdateClick = () => {
 		console.log("Inpuit Data: ", { title, storyImg, story, visitedLocation, visitedDate });
