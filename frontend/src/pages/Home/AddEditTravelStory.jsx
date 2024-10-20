@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { MdAdd, MdClose, MdDeleteOutline, MdUpdate } from "react-icons/md";
 import DateSelector from "../../components/Input/DateSelector";
+import ImageSelector from "../../components/Input/ImageSelector";
+import TagInput from "../../components/Input/TagInput";
 
 const AddEditTravelStory = ({ storyInfo, type, onClose, getAllTravelStories }) => {
 	const [title, setTitle] = useState("");
@@ -10,6 +12,8 @@ const AddEditTravelStory = ({ storyInfo, type, onClose, getAllTravelStories }) =
 	const [visitedDate, setVisitedDate] = useState(null);
 
 	const handleAddOrUpdateClick = () => {};
+
+	const handleDeleteStoryImg = async () => {};
 
 	return (
 		<div>
@@ -54,6 +58,12 @@ const AddEditTravelStory = ({ storyInfo, type, onClose, getAllTravelStories }) =
 						<DateSelector date={visitedDate} setDate={setVisitedDate} />
 					</div>
 
+					<ImageSelector
+						image={storyImg}
+						setImage={setStoryImg}
+						handleDeleteImage={handleDeleteStoryImg}
+					/>
+
 					<div className="flex flex-col gap-2 mt-4">
 						<label className="input-label">STORY</label>
 						<textarea
@@ -64,6 +74,11 @@ const AddEditTravelStory = ({ storyInfo, type, onClose, getAllTravelStories }) =
 							value={story}
 							onChange={({ target }) => setStory(target.value)}
 						/>
+					</div>
+
+					<div className="pt-3">
+						<label className="input-label">VISITED LOCATIONS</label>
+						<TagInput tags={visitedLocation} setTags={setVisitedLocation} />
 					</div>
 				</div>
 			</div>
