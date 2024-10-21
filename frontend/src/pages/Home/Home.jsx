@@ -11,6 +11,7 @@ import AddEditTravelStory from "./AddEditTravelStory";
 import ViewTravelStory from "./ViewTravelStory";
 import EmptyCard from "../../components/Cards/EmptyCard";
 import EmptyImg from "../../assets/images/placeholder.svg";
+import { DayPicker } from "react-day-picker";
 
 const Home = () => {
 	const navigate = useNavigate();
@@ -19,6 +20,11 @@ const Home = () => {
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filterType, setFilterType] = useState("");
+
+	const [dateRange, setDateRange] = useState({
+		form: null,
+		to: null,
+	});
 
 	const [openAddEditModal, setOpenAddEditModal] = useState({
 		isShown: false,
@@ -123,6 +129,13 @@ const Home = () => {
 		getAllTravelStories();
 	};
 
+	const filterStoriesByDate = async (day) => {};
+
+	const handleDayClick = () => {
+		setDateRange(day);
+		filterStoriesByDate(day);
+	};
+
 	useEffect(() => {
 		getAllTravelStories();
 		getUserInfo();
@@ -168,7 +181,19 @@ const Home = () => {
 								message={`Start creating your first Travel Story! Click the 'Add' button to jot down your thoughts, ideas, and memories.`}
 							/>
 						)}
-						<div className="w-[320px]"></div>
+						<div className="w-[340px]">
+							<div className="bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-lg">
+								<div className="p-3">
+									<DayPicker
+										captionLayout="dropdown-buttons"
+										mode="range"
+										selected={dateRange}
+										onSelect={handleDayClick}
+										pagedNavigation
+									/>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
