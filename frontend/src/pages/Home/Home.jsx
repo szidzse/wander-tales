@@ -16,6 +16,10 @@ const Home = () => {
 	const navigate = useNavigate();
 	const [userInfo, setUserInfo] = useState({});
 	const [allStories, setAllStories] = useState([]);
+
+	const [searchQuery, setSearchQuery] = useState("");
+	const [filterType, setFilterType] = useState("");
+
 	const [openAddEditModal, setOpenAddEditModal] = useState({
 		isShown: false,
 		type: "add",
@@ -97,6 +101,28 @@ const Home = () => {
 		}
 	};
 
+	const onSearchStory = async (query) => {
+		try {
+			const response = await axiosInstance.get("/search", {
+				params: {
+					query,
+				},
+			});
+
+			if (response.data && response.data.stories) {
+				setFilterType("search");
+				setAllStories(response.data.stories);
+			}
+		} catch (error) {
+			console.log("An unexpected error occurred. Please try again.");
+		}
+	};
+
+	const handleClearSearch = () => {
+		setFilterType("");
+		getAllTravelStories();
+	};
+
 	useEffect(() => {
 		getAllTravelStories();
 		getUserInfo();
@@ -106,7 +132,13 @@ const Home = () => {
 
 	return (
 		<>
-			<Navbar userInfo={userInfo} />
+			<Navbar
+				userInfo={userInfo}
+				searchQuery={searchQuery}
+				setSearchQuery={setSearchQuery}
+				onSearchNote={onSearchStory}
+				handleClearSearch={handleClearSearch}
+			/>
 
 			<div className="container mx-auto py-10">
 				<div className="flex gap-7">
